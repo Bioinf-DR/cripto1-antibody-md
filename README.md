@@ -1,4 +1,4 @@
-# MD input files — h10D1/Cripto-1 and h1B4/Cripto-1 complexes
+# MD input files — Cripto-1 in complex with the humanized antibodies 10D1 and 1B4
 
 Input files needed to reproduce the all-atom molecular dynamics simulations reported in:
 
@@ -7,19 +7,18 @@ Input files needed to reproduce the all-atom molecular dynamics simulations repo
 > Sanna R., Ronca R., Gracia Carmona O., Ruvo M., Raimondo D., Sandomenico A.
 > *International Journal of Biological Macromolecules* (2026). DOI: `<TO FILL>`
 
-This deposit contains the **starting coordinates, topologies and run parameters** for the two
-simulated systems, plus the driver scripts used for minimization, equilibration and production.
-Trajectories are not included; they are available from the corresponding author on reasonable
-request.
+This repository contains the **starting coordinates, topologies, run parameters and driver script**
+for the two simulated systems. Trajectories are not included; they are available from the
+corresponding author on reasonable request.
 
 ---
 
 ## 1. Systems
 
-| Directory | System | Contents |
-|---|---|---|
-| `h10D1_Cripto1/` | Fab h10D1 in complex with Cripto-1 (residues 31–161) | starting structure, topology, force-field files, index file |
-| `h1B4_Cripto1/`  | Fab h1B4 in complex with Cripto-1 (residues 31–161)  | starting structure, topology, force-field files, index file |
+| Directory | System |
+|---|---|
+| `Cripto-1_10D1/` | h10D1 in complex with Cripto-1 (residues 31–161) |
+| `Cripto-1_1B4/`  | h1B4 in complex with Cripto-1 (residues 31–161)  |
 
 Both starting structures are the HADDOCK 2.4 top-scoring docking poses, solvated and ionized with
 the CHARMM-GUI *Solution Builder*.
@@ -29,51 +28,78 @@ the CHARMM-GUI *Solution Builder*.
 - Antigen: full-length Cripto-1 (UniProt P13385) predicted with AlphaFold 2.3; the first 30 residues
   (signal peptide) were removed, leaving the mature soluble form 31–161. The N-terminal residue is
   capped with an acetyl group.
-- Antibodies: Fv/Fab models of h10D1 and h1B4 built with RosettaAntibody (ROSIE) and refined at
-  CDR-H3 with RFdiffusion.
+- Antibodies: models of h10D1 and h1B4 built with RosettaAntibody (ROSIE) and refined at CDR-H3 with
+  RFdiffusion. Each simulated system contains three protein chains — Cripto-1 plus the antibody
+  heavy and light chains — for a total of 360 residues.
+  `<TO CONFIRM: 360 residues total corresponds to an Fv construct (VH + VL), not a Fab. Align this
+  section and Methods 2.10 with whichever is correct.>`
 - Force field: **CHARMM36m** for the protein, **TIP3P** water.
-- Box: rectangular, periodic, 10 Å solute–box buffer.
+- Box: cubic, periodic, 11.6 nm per side (10 Å solute–box buffer).
 - Ions: 0.15 M NaCl, system neutral.
 - Protonation states from PropKa at pH 7. Histidines protonated on Nδ: H33, H74, H108, H135, H157
   (Cripto-1); H38 (h10D1 heavy chain); H107 (h10D1 light chain). Cripto-1 **H120 is ε-protonated**.
-- Disulfides: Cripto-1 C115–C133, C128–C149, C131–C140; both Fabs C23–C104 in heavy and light chain.
+- Disulfides: Cripto-1 C115–C133, C128–C149, C131–C140; both antibodies C23–C104 in heavy and light
+  chain.
 
-Software: **GROMACS 2022.3**.
+Software used for the published runs: **GROMACS 2022.3**.
 
 ---
 
-## 2. Directory layout
+## 2. Repository layout
 
 ```
 .
 ├── README.md
-├── mdp/
+├── MDP/                          # run parameters, shared by both systems
 │   ├── minimization.mdp
 │   ├── npt1.mdp … npt7.mdp
 │   ├── nvt1.mdp … nvt7.mdp
 │   ├── pre_production.mdp
 │   └── production_replicas.mdp
 ├── scripts/
-│   ├── execute_minimization.sh
-│   └── execute_equilibration_preproduction.sh
-├── h10D1_Cripto1/
-│   ├── step3_input.pdb     # solvated, ionized system (CHARMM-GUI output)
-│   ├── topol.top
-│   ├── toppar/             # CHARMM36m itp files written by CHARMM-GUI
-│   ├── *.itp               # chain topologies and position-restraint files
-│   └── index.ndx           # must define the SOLU and SOLV groups
-└── h1B4_Cripto1/
+│   └── run_md_pipeline.sh        # runs the whole workflow for one system
+├── Cripto-1_10D1/
+│   ├── step3_input.gro           # solvated, ionized system (CHARMM-GUI output)
+│   ├── topol.top                 # includes everything in toppar/
+│   ├── index.ndx                 # defines the SOLU and SOLV groups
+│   └── toppar/                   # CHARMM36m parameters and chain topologies
+│       ├── forcefield.itp
+│       ├── PROA.itp              # `<TO CONFIRM: which chain is which>`
+│       ├── PROB.itp
+│       ├── PROC.itp
+│       ├── TIP3.itp              # water
+│       ├── SOD.itp               # Na+
+│       └── CLA.itp               # Cl-
+└── Cripto-1_1B4/
     └── (same layout)
 ```
+
+> `topol.top` is only a wrapper: it `#include`s the files in `toppar/`, so the whole folder is
+> required and must stay with its topology. The position-restraint blocks driven by
+> `-DPOSRES_FC_BB` and `-DPOSRES_FC_SC` are defined inside the `PRO*.itp` chain topologies.
+>
+> Before a long run, check that everything resolves by building a test `.tpr` inside each system
+> directory:
+>
+> ```bash
+> cd Cripto-1_10D1
+> gmx grompp -f ../MDP/minimization.mdp -o test.tpr \
+>            -c step3_input.gro -r step3_input.gro -p topol.top -n index.ndx
+> rm -f test.tpr mdout.mdp
+> ```
+>
+> The system contains 146857 atoms: 5524 protein, 133 Na⁺, 137 Cl⁻ and 47021 waters. If `grompp`
+> reports a different total, the structure and the topology do not belong to the same build.
+
 ---
 
 ## 3. Simulation protocol
 
 ### 3.1 Energy minimization — `minimization.mdp`
 
-Steepest descent, 5000 steps, `emtol = 1000 kJ mol⁻¹ nm⁻¹`, with harmonic position restraints of
-2000 kJ mol⁻¹ nm⁻² on backbone atoms and 200 kJ mol⁻¹ nm⁻² on side chains of both Cripto-1 and the
-antibody.
+A single steepest-descent run, 5000 steps, `emtol = 1000 kJ mol⁻¹ nm⁻¹`, starting from
+`step3_input.gro`, with harmonic position restraints of 2000 kJ mol⁻¹ nm⁻² on backbone atoms and
+200 kJ mol⁻¹ nm⁻² on side chains of both Cripto-1 and the antibody.
 
 ### 3.2 Equilibration — seven NPT/NVT cycles
 
@@ -107,71 +133,82 @@ with a 1.2 nm real-space cut-off; hydrogen bonds constrained with LINCS (`lincs_
 
 Unrestrained NPT at 303.15 K, coordinates saved every 10 ps. **Three independent replicas of 500 ns
 were run per system** (1.5 µs per system, 3 µs total). Replicas are made independent by
-`gen-vel = yes` with `gen-seed = -1`, i.e. each replica draws a fresh set of velocities from a
-Maxwell distribution.
+`gen-vel = yes` with `gen-seed = -1`: each one draws a fresh set of velocities from a Maxwell
+distribution.
 
-`nsteps` is set to `-1` in the deposited file, since the runs were extended with `mdrun -maxh` on the
-local queue. To reproduce a 500 ns replica, set:
-
-```
-nsteps = 250000000    ; 250000000 * 2 fs = 500 ns
-```
+`nsteps` is set to `-1` in the deposited file, since the runs were extended on the local queue.
+A 500 ns replica corresponds to `nsteps = 250000000` (250 × 10⁶ × 2 fs); `run_md_pipeline.sh` sets
+this automatically.
 
 ---
 
 ## 4. How to rerun
 
-From inside one of the system directories, with the `mdp/` files in place:
+### With the pipeline script
+
+From inside one of the system directories:
 
 ```bash
-# 1. Minimization
-gmx grompp -f minimization.mdp -o minimization.tpr \
-           -c step3_input.pdb -r step3_input.pdb -p topol.top -n index.ndx
-gmx mdrun -v -deffnm minimization
-
-# 2. Equilibration + pre-production (7 NPT/NVT cycles, then 50 ns)
-bash execute_equilibration_preproduction.sh
-
-# 3. Production — repeat three times in separate directories
-gmx grompp -f production_replicas.mdp -o production_replicas.tpr \
-           -c pre_production.gro -r pre_production.gro -p topol.top -n index.ndx
-gmx mdrun -v -deffnm production_replicas
+cd Cripto-1_10D1/
+../scripts/run_md_pipeline.sh
 ```
 
-`execute_equilibration_preproduction.sh` chains the steps in the order
-`npt1 → nvt1 → npt2 → nvt2 → … → npt7 → nvt7 → pre_production`, each `grompp` taking the `.gro` of
-the previous step as both `-c` and `-r`. Adjust `-nt 48` in the script to the core count of your
-machine (or replace it with your scheduler's submission syntax).
+This runs minimization → 7 NPT/NVT cycles → 50 ns pre-production → 3 production replicas, in order,
+stopping if any step fails. To leave it running after closing the terminal:
+
+```bash
+nohup ../scripts/run_md_pipeline.sh > pipeline.log 2>&1 &
+```
+
+Settings are passed as environment variables, so the script does not need to be edited:
+
+```bash
+NT=24 ../scripts/run_md_pipeline.sh                                     # 24 CPU threads
+REPLICAS=5 ../scripts/run_md_pipeline.sh                                # 5 replicas
+GMX=gmx_d ../scripts/run_md_pipeline.sh                                 # double-precision build
+MDRUN_OPTS="-ntmpi 1 -ntomp 12 -nb gpu" ../scripts/run_md_pipeline.sh   # GPU run
+```
+
+The script is restartable: finished steps are skipped and an interrupted step resumes from its
+GROMACS checkpoint, so it is safe to launch again after a walltime kill.
+
+Outputs are written in the system directory: `minimization.gro`, `npt*.gro`, `nvt*.gro`,
+`pre_production.gro`, and the trajectories in `production/rep{1,2,3}/production.xtc`. All `grompp`
+and `mdrun` output goes to `logs/`.
+
+### Manually
+
+Each step is a `grompp` followed by an `mdrun`, chained through the `.gro` files:
+
+```bash
+gmx grompp -f ../MDP/minimization.mdp -o minimization.tpr \
+           -c step3_input.gro -r step3_input.gro -p topol.top -n index.ndx
+gmx mdrun -deffnm minimization
+
+gmx grompp -f ../MDP/npt1.mdp -o npt1.tpr \
+           -c minimization.gro -r minimization.gro -p topol.top -n index.ndx
+gmx mdrun -deffnm npt1
+# … npt1 → nvt1 → npt2 → nvt2 → … → npt7 → nvt7 → pre_production
+```
 
 Approximate wall time: `<TO FILL — e.g. ~X ns/day on N cores / GPU model>`.
 
 ---
 
-## 5. Notes and known inconsistencies
+## 5. Notes
 
-Please read before rerunning:
-
-1. **Do not deposit `execute_minimization.sh`.** That script loops over
-   `minimization_2.mdp … minimization_21.mdp`, i.e. a 20-step staged minimization that was not the
-   protocol used here: minimization was a single steepest-descent run with `minimization.mdp`,
-   starting from `step3_input.pdb`.
-2. **`npt4.mdp` sets `POSRES_FC_BB = 2500.0`** while the surrounding steps follow the sequence
-   2000 → 1000 → 500 → **250** → 150 → 50, and `nvt4.mdp` uses 250.0. This looks like a typo that
-   briefly *increased* backbone restraints at cycle 4. It does not invalidate the equilibration —
-   the restraint is fully released by cycle 7 — but the manuscript states restraints were
-   "progressively reduced across the cycles", so either fix the value or note the deviation.
-3. **`nvt2.mdp` runs 0.5 ns**, not 1 ns like the other cycles. Total equilibration is therefore
-   15.5 ns + 50 ns pre-production = **65.5 ns**, not the 66 ns quoted in the Methods section.
-4. `pre_production.mdp` has `gen-vel = yes` without `gen-temp`, so velocities are regenerated at the
-   GROMACS default (300 K) rather than 303.15 K. Harmless over a 50 ns run, but worth being aware of
-   if you are comparing energies from the first few ps.
-5. The position-restraint macros `-DPOSRES_FC_BB` and `-DPOSRES_FC_SC` require the CHARMM-GUI-style
-   `posre*.itp` files; these must be present in the topology directory or `grompp` will silently
-   apply no restraints.
+1. Total equilibration is 16 ns (six 1 ns + 1 ns cycles, then one 2 ns + 2 ns cycle), followed by
+   50 ns of pre-production: 66 ns before the production runs begin.
+2. `pre_production.mdp` has `gen-vel = yes` without `gen-temp`, so velocities are regenerated at the
+   GROMACS default (300 K) rather than 303.15 K. This is inconsequential over a 50 ns run, but worth
+   knowing if you compare energies from the first few picoseconds.
+3. Start from `step3_input.gro` rather than a PDB: the `.gro` carries the periodic box vectors on its
+   last line, which `grompp` requires.
+4. The files were prepared with GROMACS 2022.3 and also build cleanly with 2025.2.
 
 ---
 
-## 6. Contact
+## 6. Contact and licence
 
 `<TO FILL — corresponding author name and email>`
 
