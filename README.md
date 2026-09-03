@@ -165,7 +165,7 @@ Settings are passed as environment variables, so the script does not need to be 
 ```bash
 NT=24 ../scripts/run_md_pipeline.sh                                     # 24 CPU threads
 REPLICAS=5 ../scripts/run_md_pipeline.sh                                # 5 replicas
-GMX=gmx_d ../scripts/run_md_pipeline.sh                                 # double-precision build
+GMX=gmx ../scripts/run_md_pipeline.sh                                 # double-precision build
 MDRUN_OPTS="-ntmpi 1 -ntomp 12 -nb gpu" ../scripts/run_md_pipeline.sh   # GPU run
 ```
 
