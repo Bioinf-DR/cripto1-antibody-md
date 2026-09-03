@@ -190,9 +190,6 @@ gmx grompp -f ../MDP/npt1.mdp -o npt1.tpr \
 gmx mdrun -deffnm npt1
 # … npt1 → nvt1 → npt2 → nvt2 → … → npt7 → nvt7 → pre_production
 ```
-
-Approximate wall time: `<TO FILL — e.g. ~X ns/day on N cores / GPU model>`.
-
 ---
 
 ## 5. Notes
