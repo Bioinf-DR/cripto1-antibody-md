@@ -1,0 +1,48 @@
+define                  = -DPOSRES -DPOSRES_FC_BB=500.0 -DPOSRES_FC_SC=50.0
+;Run parameters
+integrator              = md
+dt                      = 0.002         ; 2 fs
+nsteps                  = 500000	; 500000*2 fs = 1000000 fs = 1 ns
+;Output control
+nstvout         	= 2500          ; Save velocities every 5 ps
+nstfout         	= 2500          ; Save forces every 5 ps
+nstxout-compressed 	= 500       	; Save compressed coordinates every 1 ps (useful for large simulations)
+nstenergy       	= 500           ; Save energies every 1 ps
+nstcalcenergy           = 100                   ; Energies calculated every 0.2 ps 
+nstlog          	= 500           ; Update log file every 1 ps
+; Neighbor searching and vdW
+cutoff-scheme           = Verlet
+nstlist                 = 20
+rlist                   = 1.2
+vdwtype                 = Cut-off
+vdw-modifier            = Force-switch
+rvdw_switch             = 1.0
+rvdw                    = 1.2
+; Electrostatics
+coulombtype             = PME
+rcoulomb                = 1.2
+; Temperature coupling
+tcoupl                  = V-rescale
+tc_grps                 = SOLU SOLV
+tau_t                   = 1.0 1.0
+ref_t                   = 200 200
+; Pressure coupling
+pcoupl                  = C-rescale                     ; pressure coupling is on for NPT
+pcoupltype              = isotropic                     ; uniform scaling of box vectors
+tau_p                   = 2.0                           ; time constant, in ps
+ref_p                   = 1.0                           ; reference pressure, in bar
+compressibility         = 4.5e-5                        ; isothermal compressibility of water, bar^-1
+refcoord_scaling        = com				; is generally the most stable option. For most systems, it should not make a difference (Lemkul)
+; Bond parameters
+constraints             = h-bonds
+constraint_algorithm    = LINCS
+lincs_iter              = 1         ; accuracy of LINCS
+lincs_order             = 4         ; also related to accuracy
+; Center of Mass Motion
+nstcomm                 = 100
+comm_mode               = linear
+comm_grps               = SOLU SOLV
+; Periodic boundary conditions
+pbc             	= xyz            ; 3D periodic boundary conditions
+gen-vel                 = no
+continuation		= yes
