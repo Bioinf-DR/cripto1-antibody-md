@@ -86,7 +86,7 @@ stochastic C-rescale barostat, isotropic, `tau_p = 2.0 ps`, `ref_p = 1.0 bar`.
 | 1 | `npt1` / `nvt1` | 100 | 2000 | 200 | 1 ns | 1 ns |
 | 2 | `npt2` / `nvt2` | 150 | 1000 | 100 | 1 ns | 0.5 ns |
 | 3 | `npt3` / `nvt3` | 200 | 500 | 50 | 1 ns | 1 ns |
-| 4 | `npt4` / `nvt4` | 250 | 2500 (NPT) / 250 (NVT) | 25 | 1 ns | 1 ns |
+| 4 | `npt4` / `nvt4` | 250 | 250 | 25 | 1 ns | 1 ns |
 | 5 | `npt5` / `nvt5` | 280 | 150 | 10 | 1 ns | 1 ns |
 | 6 | `npt6` / `nvt6` | 303.15 | 50 | 0 | 1 ns | 1 ns |
 | 7 | `npt7` / `nvt7` | 303.15 | none | none | 2 ns | 2 ns |
