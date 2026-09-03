@@ -19,7 +19,7 @@
 #
 #  Put this file next to your system files and run it from that directory:
 #
-#      cd h10D1_Cripto1/
+#      cd Cripto-1_10D1/
 #      ../scripts/run_md_pipeline.sh
 #
 #  To keep it running after you close the terminal:
@@ -57,13 +57,15 @@ set -euo pipefail
 # -----------------------------------------------------------------------------
 
 GMX=${GMX:-gmx}                        # how GROMACS is called: gmx, gmx_mpi, ...
-MDP_DIR=${MDP_DIR:-../mdp}             # folder containing all the .mdp files
+MDP_DIR=${MDP_DIR:-../MDP}             # folder containing all the .mdp files
 TOP=${TOP:-topol.top}                  # topology of this system
 NDX=${NDX:-index.ndx}                  # index file: MUST define SOLU and SOLV
-START=${START:-step3_input.pdb}        # solvated + ionized system, as written
-                                       # by CHARMM-GUI (used both as starting
-                                       # coordinates and as restraint reference
-                                       # for the minimization)
+START=${START:-step3_input.gro}        # solvated + ionized system from CHARMM-GUI.
+                                       # Use the .gro, not the .pdb: the .gro
+                                       # carries the periodic box vectors on its
+                                       # last line, which grompp needs. Serves as
+                                       # both coordinates (-c) and restraint
+                                       # reference (-r) for the minimization.
 
 CYCLES=${CYCLES:-7}                    # number of NPT/NVT equilibration cycles
 REPLICAS=${REPLICAS:-3}                # number of independent production runs
