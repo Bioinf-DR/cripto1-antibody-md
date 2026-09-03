@@ -84,7 +84,7 @@ stochastic C-rescale barostat, isotropic, `tau_p = 2.0 ps`, `ref_p = 1.0 bar`.
 | Cycle | `.mdp` files | *T* (K) | Backbone restraint (kJ mol⁻¹ nm⁻²) | Side-chain restraint | NPT length | NVT length |
 |---|---|---|---|---|---|---|
 | 1 | `npt1` / `nvt1` | 100 | 2000 | 200 | 1 ns | 1 ns |
-| 2 | `npt2` / `nvt2` | 150 | 1000 | 100 | 1 ns | 0.5 ns |
+| 2 | `npt2` / `nvt2` | 150 | 1000 | 100 | 1 ns | 1 ns |
 | 3 | `npt3` / `nvt3` | 200 | 500 | 50 | 1 ns | 1 ns |
 | 4 | `npt4` / `nvt4` | 250 | 250 | 25 | 1 ns | 1 ns |
 | 5 | `npt5` / `nvt5` | 280 | 150 | 10 | 1 ns | 1 ns |
