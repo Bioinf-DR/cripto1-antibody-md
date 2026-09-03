@@ -65,12 +65,6 @@ Software: **GROMACS 2022.3**.
 └── h1B4_Cripto1/
     └── (same layout)
 ```
-
-> **Required.** `index.ndx` is not optional: every `.mdp` file uses `tc_grps = SOLU SOLV` and
-> `comm_grps = SOLU SOLV`, so `grompp` will fail without an index file defining those two groups
-> (`SOLU` = protein chains, `SOLV` = water + ions). The `toppar/` directory is likewise required,
-> since `topol.top` `#include`s it.
-
 ---
 
 ## 3. Simulation protocol
