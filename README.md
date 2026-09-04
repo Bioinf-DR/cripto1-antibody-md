@@ -37,7 +37,7 @@ the CHARMM-GUI *Solution Builder*.
 │   ├── index.ndx                 # defines the SOLU and SOLV groups
 │   └── toppar/                   # CHARMM36m parameters and chain topologies
 │       ├── forcefield.itp
-│       ├── PROA.itp              # `<TO CONFIRM: which chain is which>`
+│       ├── PROA.itp              
 │       ├── PROB.itp
 │       ├── PROC.itp
 │       ├── TIP3.itp              # water
